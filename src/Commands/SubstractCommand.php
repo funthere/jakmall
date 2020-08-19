@@ -63,7 +63,7 @@ class SubstractCommand extends Command
 
     protected function getOperator(): string
     {
-        return '+';
+        return '-';
     }
 
     /**

@@ -4,17 +4,17 @@ namespace Jakmall\Recruitment\Calculator\Commands;
 
 use Illuminate\Console\Command;
 
-class MultiplyCommand extends Command
+class DivideCommand extends Command
 {
     /**
      * @var string
      */
-    protected $signature = 'multiply {numbers*}';
+    protected $signature = 'divide {numbers*}';
 
     /**
      * @var string
      */
-    protected $description = 'Multiply all given Numbers';
+    protected $description = 'Divide all given Numbers';
 
     public function __construct()
     {
@@ -31,12 +31,12 @@ class MultiplyCommand extends Command
 
     protected function getCommandVerb(): string
     {
-        return 'multiply';
+        return 'divide';
     }
 
     protected function getCommandPassiveVerb(): string
     {
-        return 'multiplied';
+        return 'divided';
     }
 
     public function handle(): void
@@ -63,7 +63,7 @@ class MultiplyCommand extends Command
 
     protected function getOperator(): string
     {
-        return '*';
+        return '/';
     }
 
     /**
@@ -90,6 +90,6 @@ class MultiplyCommand extends Command
      */
     protected function calculate($number1, $number2)
     {
-        return $number1 * $number2;
+        return $number1 / $number2;
     }
 }
