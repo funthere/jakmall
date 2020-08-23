@@ -4,6 +4,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Jakmall\Recruitment\Calculator\Http\Foundation\RouteServiceProvider;
 
 $appConfig = require_once __DIR__.'/../config/app.php';
@@ -14,6 +15,18 @@ $container->make(RouteServiceProvider::class)->register($container);
 foreach ($providers as $provider) {
     $container->make($provider)->register($container);
 }
+    
+$connections = $appConfig['connections'];
+$capsule = new Capsule;
+if(isset($connections['sqlite'])) {
+    $capsule->addConnection($connections['sqlite'], 'default');
+}
+foreach ($connections as $key => $value) {
+    $capsule->addConnection($value, $key);
+}
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+
 
 /** @var \Illuminate\Routing\Router $router */
 $router = $container->get('router');
