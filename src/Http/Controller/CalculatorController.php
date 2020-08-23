@@ -3,8 +3,6 @@
 namespace Jakmall\Recruitment\Calculator\Http\Controller;
 
 use Illuminate\Http\Request;
-use Jakmall\Recruitment\Calculator\Commands\AddCommand;
-use Illuminate\Support\Facades\Artisan;
 use \Jakmall\Recruitment\Calculator\History\Infrastructure\CommandHistoryManagerInterface;
 
 class CalculatorController
