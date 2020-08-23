@@ -3,6 +3,7 @@
 namespace Jakmall\Recruitment\Calculator\Commands;
 
 use Illuminate\Console\Command;
+use \Jakmall\Recruitment\Calculator\History\Infrastructure\CommandHistoryManagerInterface;
 
 class PowCommand extends Command
 {
@@ -16,7 +17,7 @@ class PowCommand extends Command
      */
     protected $description = 'Exponent the given Numbers';
 
-    public function __construct()
+    public function __construct(CommandHistoryManagerInterface $historyManager)
     {
         parent::__construct();
         $commandVerb = $this->getCommandVerb();
@@ -27,6 +28,8 @@ class PowCommand extends Command
             $this->getCommandPassiveVerb()
         );
         $this->description = sprintf('%s all given Numbers', ucfirst($commandVerb));
+
+        $this->historyManager = $historyManager;
     }
 
     protected function getCommandVerb(): string
@@ -46,6 +49,9 @@ class PowCommand extends Command
         $result = $this->calculateAll($numbers);
 
         $this->comment(sprintf('%s = %s', $description, $result));
+        
+        $toInsert = ['command' => $this->getCommandVerb(), 'description' => $description, 'result' => $result, 'output' => sprintf('%s = %s', $description, $result), 'time' => date('Y-m-d H:i:s')];
+        $this->historyManager->log($toInsert);
     }
 
     protected function getInput(): array

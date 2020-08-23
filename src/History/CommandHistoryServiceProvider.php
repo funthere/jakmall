@@ -17,7 +17,7 @@ class CommandHistoryServiceProvider implements ContainerServiceProviderInterface
             CommandHistoryManagerInterface::class,
             function () {
                 //todo: register implementation
-                return null;
+                return new \Jakmall\Recruitment\Calculator\History\Service\CommandHistoryManagerService();
             }
         );
     }

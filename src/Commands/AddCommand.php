@@ -3,6 +3,7 @@
 namespace Jakmall\Recruitment\Calculator\Commands;
 
 use Illuminate\Console\Command;
+use \Jakmall\Recruitment\Calculator\History\Infrastructure\CommandHistoryManagerInterface;
 
 class AddCommand extends Command
 {
@@ -16,7 +17,9 @@ class AddCommand extends Command
      */
     protected $description = 'Add all given numbers';
 
-    public function __construct()
+    private $historyManager;
+
+    public function __construct(CommandHistoryManagerInterface $historyManager)
     {
         parent::__construct();
         $commandVerb = $this->getCommandVerb();
@@ -27,6 +30,8 @@ class AddCommand extends Command
             $this->getCommandPassiveVerb()
         );
         $this->description = sprintf('%s all given Numbers', ucfirst($commandVerb));
+
+        $this->historyManager = $historyManager;
     }
 
     protected function getCommandVerb(): string
@@ -41,11 +46,15 @@ class AddCommand extends Command
 
     public function handle(): void
     {
+        // var_dump($this->historyManager);die;
         $numbers = $this->getInput();
         $description = $this->generateCalculationDescription($numbers);
         $result = $this->calculateAll($numbers);
 
         $this->comment(sprintf('%s = %s', $description, $result));
+
+        $toInsert = ['command' => $this->getCommandVerb(), 'description' => $description, 'result' => $result, 'output' => sprintf('%s = %s', $description, $result), 'time' => date('Y-m-d H:i:s')];
+        $this->historyManager->log($toInsert);
     }
 
     protected function getInput(): array
