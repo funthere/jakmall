@@ -3,7 +3,7 @@
 namespace Jakmall\Recruitment\Calculator\Http\Controller;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use \Jakmall\Recruitment\Calculator\History\Infrastructure\CommandHistoryManagerInterface;
 
 class HistoryController
@@ -19,17 +19,18 @@ class HistoryController
     public function index()
     {
         $result = $this->historyManager->findAll();
-        return new Response($result);
+        return new JsonResponse($result);
     }
 
     public function show($id)
     {
-        
+        $result = $this->historyManager->findOne($id);
+        return new JsonResponse($result);
     }
 
     public function remove($id)
     {
-        // todo: modify codes to remove history
-        dd('create remove history logic here');
+        $result = $this->historyManager->deleteOne($id);
+        return new JsonResponse($result, 204);
     }
 }

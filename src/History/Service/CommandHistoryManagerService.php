@@ -74,6 +74,27 @@ class CommandHistoryManagerService implements CommandHistoryManagerInterface
         return $data->all();
     }
 
+    public function findOne($id)
+    {
+        $item = DB::table('log')->where('id', $id)->first();
+        return [
+            'id' => $item->id,
+            'command' => ucwords($item->command),
+            'description' => $item->description,
+            'result' => $item->result,
+            'output' => $item->output,
+            'time' => $item->time,
+        ];
+    }
+
+    public function deleteOne($id)
+    {
+        $deleteDb = DB::connection('mysql')->table('log')->where('id', $id)->delete();
+        $deleteFile = DB::connection('sqlite')->table('log')->where('id', $id)->delete();
+
+        return $deleteDb && $deleteFile;
+    }
+
     private function getArray($result)
     {
         return $result->map(function ($item, $key) {
