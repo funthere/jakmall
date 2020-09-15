@@ -3,14 +3,16 @@
 namespace Jakmall\Recruitment\Calculator\History\Service;
 
 use Illuminate\Database\Capsule\Manager as DB;
+use Jakmall\Recruitment\Calculator\History\Libs\FileDatabase;
 use Jakmall\Recruitment\Calculator\History\Infrastructure\CommandHistoryManagerInterface;
 
 class CommandHistoryManagerService implements CommandHistoryManagerInterface
 {
 
+    protected $dbFile;
     public function __construct()
     {
-
+        $this->dbFile = new FileDatabase();
     }
     /**
      * Returns array of command history.
@@ -34,10 +36,10 @@ class CommandHistoryManagerService implements CommandHistoryManagerInterface
      */
     public function log($command): bool
     {
-        $insertDb = DB::connection('mysql')->table('log')->insert($command);
-        $insertFile = DB::connection('sqlite')->table('log')->insert($command);
+        $insertDb = DB::connection('sqlite')->table('log')->insertGetId($command);
+        $insertJson = $this->dbFile->store($command, $insertDb);
 
-        return $insertDb && $insertFile;
+        return $insertJson && $insertDb;
     }
 
     /**
@@ -47,36 +49,40 @@ class CommandHistoryManagerService implements CommandHistoryManagerInterface
      */
     public function clearAll():bool
     {
-        $clearDb = DB::connection('mysql')->table('log')->delete();
-        $clearFile = DB::connection('sqlite')->table('log')->delete();
+        $clearDb = DB::connection('sqlite')->table('log')->delete();
+        $clearJson = $this->dbFile->clear();
 
-        return $clearDb && $clearFile;
+
+        return $clearJson && $clearDb;
     }
 
     public function find($command, $driver = 'database'): array
     {
-        $connection = 'default';
+        if($driver == 'file') {
+            $result = $this->dbFile->whereIn($command);
+            return $result;
 
-        if($driver == 'database') {
-            $connection = 'mysql';
         } else {
-            $connection = 'sqlite';
+            $connection = 'default';
+
+            $result = DB::connection($connection)->table('log');
+            if(count($command) > 0) {
+                $result = $result->whereIn('command', $command);
+            }
+
+            $result = $result->get();
+            $data = $this->getArray($result);
+
+            return $data->all();
         }
-
-        $result = DB::connection($connection)->table('log');
-        if(count($command) > 0) {
-            $result = $result->whereIn('command', $command);
-        }
-
-        $result = $result->get();
-        $data = $this->getArray($result);
-
-        return $data->all();
     }
 
     public function findOne($id)
     {
         $item = DB::table('log')->where('id', $id)->first();
+        if(!$item) {
+            return [];
+        }
         return [
             'id' => $item->id,
             'command' => ucwords($item->command),
@@ -89,10 +95,10 @@ class CommandHistoryManagerService implements CommandHistoryManagerInterface
 
     public function deleteOne($id)
     {
-        $deleteDb = DB::connection('mysql')->table('log')->where('id', $id)->delete();
-        $deleteFile = DB::connection('sqlite')->table('log')->where('id', $id)->delete();
+        $deleteDb = DB::connection('sqlite')->table('log')->where('id', $id)->delete();
+        $deleteJson = $this->dbFile->delete($id);
 
-        return $deleteDb && $deleteFile;
+        return $deleteJson && $deleteFile;
     }
 
     private function getArray($result)

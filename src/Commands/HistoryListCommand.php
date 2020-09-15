@@ -27,12 +27,12 @@ class HistoryListCommand extends Command
     public function handle(): void
     {
         $commands = $this->argument('commands');
+        $driver = 'database';
         $driver = $this->option('driver');
-        if($driver) {
-            $result = $this->historyManager->find($commands, $driver);
-        } else {
-            $result = $this->historyManager->findAll();
+        if($driver && $driver == 'file') {
+            $driver = 'file';
         }
+        $result = $this->historyManager->find($commands, $driver);
 
         $header = ['No', 'Command', 'Description', 'Result', 'Output', 'Time'];
 
